@@ -1,0 +1,18 @@
+{
+  "api_keys": {
+    "daum": {
+      "api_key": "YOUR_DAUM_API_KEY"
+    },
+    "naver": {
+      "client_id": "YOUR_NAVER_CLIENT_ID",
+      "client_secret": "YOUR_NAVER_CLIENT_SECRET"
+    },
+    "google": {
+      "api_key": "YOUR_GOOGLE_API_KEY",
+      "cx": "YOUR_GOOGLE_PROGRAMMABLE_SEARCH_ENGINE_ID"
+    }
+  },
+  "paths": {
+    "reference_photos": "/path/to/your/reference/photos"
+  }
+}

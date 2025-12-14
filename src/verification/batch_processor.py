@@ -4,6 +4,7 @@ import shutil
 import pandas as pd
 import requests
 
+from ..config.setting import Setting
 from ..search.daum_searcher import DaumImageSearcher
 from ..search.google_searcher import GoogleImageSearcher
 from ..search.naver_searcher import NaverImageSearcher
@@ -12,17 +13,22 @@ from .face_verifier import FaceVerifier
 
 class BatchVerificationProcessor:
 
-    def __init__(self, reference_member_images_dir):
+    def __init__(self, reference_member_images_dir=None):
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
         self.project_root = os.path.abspath(os.path.join(self.current_dir, "../.."))
-        self.reference_member_images_dir = reference_member_images_dir
+
+        s = Setting()
+        if reference_member_images_dir is None:
+            self.reference_member_images_dir = s.get_reference_photo_path()
+
         self.searchers = {
-            "daum": DaumImageSearcher("YOUR_DAUM_API_KEY"),
+            "daum": DaumImageSearcher(s.get_api_key("daum")),
             "naver": NaverImageSearcher(
-                "YOUR_NAVER_CLIENT_ID", "YOUR_NAVER_CLIENT_SECRET"
+                s.get_api_key("naver", "client_id"),
+                s.get_api_key("naver", "client_secret"),
             ),
             "google": GoogleImageSearcher(
-                "YOUR_GOOGLE_API_KEY", "YOUR_GOOGLE_PROGRAMMABLE_SEARCH_ENGINE_ID"
+                s.get_api_key("google"), s.get_api_key("google", "cx")
             ),
         }
 
@@ -134,6 +140,5 @@ class BatchVerificationProcessor:
 
 
 if __name__ == "__main__":
-    photo_path = "YOUR_REFERENCE_MEMBER_IMAGES_DIR"
-    batch = BatchVerificationProcessor(photo_path)
+    batch = BatchVerificationProcessor()
     batch.process_members_by_huboid("na22")
