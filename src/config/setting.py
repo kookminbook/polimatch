@@ -6,10 +6,13 @@ class Setting:
 
     def __init__(self):
         self.base_dir = Path(__file__).parent.parent
-        self.config_file = self.base_dir / "config" / "config.json"
         self.load_config()
 
-    def load_config(self):
+    def load_config(self, config_path=None):
+        if config_path is not None:
+            self.config_file = Path(config_path)
+        else:
+            self.config_file = self.base_dir / "config" / "config.json"
         with open(self.config_file, "r", encoding="utf-8") as f:
             self._config = json.load(f)
 
