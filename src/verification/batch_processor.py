@@ -20,6 +20,8 @@ class BatchVerificationProcessor:
         s = Setting()
         if reference_member_images_dir is None:
             self.reference_member_images_dir = s.get_reference_photo_path()
+        else:
+            self.reference_member_images_dir = reference_member_images_dir
 
         self.searchers = {
             "daum": DaumImageSearcher(s.get_api_key("daum")),
