@@ -55,6 +55,8 @@ def test_process_members_verified_skips_search(tmp_path, monkeypatch, capsys):
         lambda: DummyVerifier({"verified": True, "similarity": 0.8}),
     )
 
+    monkeypatch.setattr(processor, "_write_processed_csv", lambda *args, **kwargs: None)
+
     # run
     processor.process_members_by_huboid("na22")
 
@@ -94,6 +96,8 @@ def test_process_members_failed_verification_triggers_search(
     monkeypatch.setattr(
         processor, "_search_images", lambda q: ["http://example.com/img1.jpg"]
     )
+
+    monkeypatch.setattr(processor, "_write_processed_csv", lambda *args, **kwargs: None)
 
     processor.process_members_by_huboid("na22")
 

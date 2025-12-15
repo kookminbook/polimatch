@@ -38,6 +38,7 @@ class BatchVerificationProcessor:
         """huboid 기반 기존 데이터에서 일괄 검증 처리"""
         member_csv = os.path.join(self.project_root, "data", f"{member_group}.csv")
         member_df = pd.read_csv(member_csv)
+        processed_results = []
 
         # 이미지 저장할 임시공간 준비
         tmp_dir = os.path.join(self.current_dir, "tmp")
@@ -104,7 +105,16 @@ class BatchVerificationProcessor:
                     print(
                         f"\033[32mSearch verification SUCCESS {row.hubo_id} {row.name} for {img_url}: {verify_result}\033[0m"
                     )
+                    processed_results.append(
+                        {
+                            "hubo_id": row.hubo_id,
+                            "name": row.name,
+                            "search_image_url": img_url,
+                        }
+                    )
                     break
+
+        self._write_processed_csv(processed_results)
 
     def _download_image(self, url, filename):
         try:
@@ -163,6 +173,12 @@ class BatchVerificationProcessor:
                 image_urls.extend(results)
 
         return image_urls
+
+    def _write_processed_csv(self, results, filename="verification_processed.csv"):
+        log_file = os.path.join(self.current_dir, filename)
+        df = pd.DataFrame(results)
+        df.to_csv(log_file, index=False, encoding="utf-8-sig")
+        print(f"Results written to {log_file}")
 
 
 if __name__ == "__main__":
