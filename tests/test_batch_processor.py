@@ -11,6 +11,9 @@ class DummyVerifier:
     def verify(self, ref_image, tmp_image):
         return self._result
 
+    def extract(self, image):
+        return {"num_faces": 1}
+
 
 def make_member_csv(root_dir: Path, group_name="na22"):
     data_dir = root_dir / "data"
@@ -96,4 +99,3 @@ def test_process_members_failed_verification_triggers_search(
 
     captured = capsys.readouterr()
     assert "Verification FAILED for 123" in captured.out
-    assert "Search results for 123" in captured.out

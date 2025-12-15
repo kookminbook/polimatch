@@ -51,10 +51,10 @@ class BatchVerificationProcessor:
         for row in member_df.itertuples():
             # 1. 검증을 위한 이미지 다운로드
             tmp_image = os.path.join(tmp_dir, f"{row.hubo_id}.jpg")
-            result = self._download_image(row.photo_url, tmp_image)
+            download_result = self._download_image(row.photo_url, tmp_image)
 
             # 2. 이미지 검증
-            if result is not None:
+            if download_result is not None:
                 ref_image = os.path.join(
                     self.reference_member_images_dir, f"{row.hubo_id}.JPG"
                 )
@@ -81,7 +81,30 @@ class BatchVerificationProcessor:
             title_words = self._get_title_words(member_group)
             q = f"{row.name} {title_words}"
             search_results = self._search_images(q)
-            print(f"Search results for {row.hubo_id} ({q}): {search_results[0]}")
+
+            # 4. 검색된 이미지들 중에서 가장 적합한 이미지 선택
+            for idx, img_url in enumerate(search_results):
+                tmp_image = os.path.join(tmp_dir, f"{row.hubo_id}_search_{idx}.jpg")
+                download_result = self._download_image(img_url, tmp_image)
+                if download_result is None:
+                    continue
+
+                face_verifier = FaceVerifier()
+                extract_result = face_verifier.extract(tmp_image)
+                if not extract_result.get("num_faces", 0) == 1:
+                    continue
+
+                verify_result = face_verifier.verify(
+                    os.path.join(
+                        self.reference_member_images_dir, f"{row.hubo_id}.JPG"
+                    ),
+                    tmp_image,
+                )
+                if verify_result.get("verified"):
+                    print(
+                        f"\033[32mSearch verification SUCCESS {row.hubo_id} {row.name} for {img_url}: {verify_result}\033[0m"
+                    )
+                    break
 
     def _download_image(self, url, filename):
         try:
@@ -90,6 +113,7 @@ class BatchVerificationProcessor:
             if response.status_code == 200:
                 with open(filename, "wb") as f:
                     f.write(response.content)
+                print(f"Downloaded image from {url} to {filename}")
                 return filename
 
             # 403 등 접근 제한 대응: 브라우저 헤더를 모방하여 재시도
