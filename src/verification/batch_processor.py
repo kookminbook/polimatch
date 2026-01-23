@@ -113,7 +113,10 @@ class BatchVerificationProcessor:
                     ),
                     tmp_image,
                 )
-                if verify_result.get("verified"):
+                if (
+                    verify_result.get("verified")
+                    and verify_result.get("confidence") == "high"
+                ):
                     print(
                         f"\033[32mSearch verification SUCCESS {row.hubo_id} {row.name} for {img_url}: {verify_result}\033[0m"
                     )
