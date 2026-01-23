@@ -3,3 +3,5 @@ __pycache__
 src/verification/tmp/
 src/config/config.json
 .coverage
+output/
+backups/

@@ -49,7 +49,9 @@ class BatchVerificationProcessor:
                 print(f"Failed to remove {tmp_dir}: {e}")
         os.makedirs(tmp_dir, exist_ok=True)
 
+        print(f"Processing members from {member_csv}... Total: {len(member_df)}")
         for row in member_df.itertuples():
+            print(f"Processing {row.hubo_id} - {row.name}...")
             # 1. 검증을 위한 이미지 다운로드
             tmp_image = os.path.join(tmp_dir, f"{row.hubo_id}.jpg")
             download_result = self._download_image(row.photo_url, tmp_image)
@@ -60,6 +62,7 @@ class BatchVerificationProcessor:
                     self.reference_member_images_dir, f"{row.hubo_id}.JPG"
                 )
                 face_verifier = FaceVerifier()
+                print(f"Verifying {ref_image} and {tmp_image}...")
                 result = face_verifier.verify(ref_image, tmp_image)
                 if result.get("verified"):
                     sim = result.get("similarity")
@@ -92,7 +95,7 @@ class BatchVerificationProcessor:
 
                 face_verifier = FaceVerifier()
                 extract_result = face_verifier.extract(tmp_image)
-                if not extract_result.get("num_faces", 0) == 1:
+                if extract_result.get("num_faces", 0) != 1:
                     continue
 
                 verify_result = face_verifier.verify(
