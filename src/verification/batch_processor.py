@@ -82,7 +82,8 @@ class BatchVerificationProcessor:
                 print(f"\033[31mVerification FAILED for {row.hubo_id}: {result}\033[0m")
 
             # 3. 이미지 다운로드 또는 검증 실패시 새로운 이미지 검색
-            title_words = self._get_title_words(member_group)
+            constituency = row.constituency if hasattr(row, "constituency") else None
+            title_words = self._get_title_words(member_group, constituency)
             q = f"{row.name} {title_words}"
             search_results = self._search_images(q)
 
@@ -151,7 +152,7 @@ class BatchVerificationProcessor:
             print(f"\033[31m_download_image exception for {filename}: {e}\033[0m")
             return None
 
-    def _get_title_words(self, member_group):
+    def _get_title_words(self, member_group, constituency=None):
         if member_group == "na22":
             return "국회의원"
         # TODO: 다른 그룹들에 대한 명칭 추가 필요
@@ -162,7 +163,7 @@ class BatchVerificationProcessor:
         elif member_group == "nec8m5":
             return ""  # 시의원, 도의원
         elif member_group == "nec8m6":
-            return ""  # 시의원, 군의원, 구의원
+            return f"{constituency}의회의원"  # 시의원, 군의원, 구의원 - ex. "강남구의회의원"
         else:
             return ValueError("Invalid member group")
 
