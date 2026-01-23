@@ -70,7 +70,7 @@ class BatchVerificationProcessor:
                 else:
                     print(f"Verifying {ref_image} and {tmp_image}...")
                     result = face_verifier.verify(ref_image, tmp_image)
-                    if result.get("verified"):
+                    if result.get("verified") and result.get("confidence") != "low":
                         sim = result.get("similarity")
                         try:
                             sim_val = float(sim) if sim is not None else None
@@ -115,7 +115,7 @@ class BatchVerificationProcessor:
                 )
                 if (
                     verify_result.get("verified")
-                    and verify_result.get("confidence") == "high"
+                    and verify_result.get("confidence") != "low"
                 ):
                     print(
                         f"\033[32mSearch verification SUCCESS {row.hubo_id} {row.name} for {img_url}: {verify_result}\033[0m"
@@ -128,6 +128,18 @@ class BatchVerificationProcessor:
                         }
                     )
                     break
+            else:
+                # for 루프가 break 없이 모두 완료된 경우: 결국 찾지 못함
+                print(
+                    f"\033[31mSearch verification FAILED for {row.hubo_id} {row.name}: all attempts failed\033[0m"
+                )
+                processed_results.append(
+                    {
+                        "hubo_id": row.hubo_id,
+                        "name": row.name,
+                        "search_image_url": None,
+                    }
+                )
 
         self._write_processed_csv(processed_results)
 
