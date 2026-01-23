@@ -62,24 +62,32 @@ class BatchVerificationProcessor:
                     self.reference_member_images_dir, f"{row.hubo_id}.JPG"
                 )
                 face_verifier = FaceVerifier()
-                print(f"Verifying {ref_image} and {tmp_image}...")
-                result = face_verifier.verify(ref_image, tmp_image)
-                if result.get("verified"):
-                    sim = result.get("similarity")
-                    try:
-                        sim_val = float(sim) if sim is not None else None
-                    except (TypeError, ValueError):
-                        sim_val = None
+                extract_result = face_verifier.extract(tmp_image)
+                if extract_result.get("num_faces", 0) != 1:
+                    print(
+                        f"\033[31mFace extraction FAILED for {row.hubo_id} in downloaded image.\033[0m"
+                    )
+                else:
+                    print(f"Verifying {ref_image} and {tmp_image}...")
+                    result = face_verifier.verify(ref_image, tmp_image)
+                    if result.get("verified"):
+                        sim = result.get("similarity")
+                        try:
+                            sim_val = float(sim) if sim is not None else None
+                        except (TypeError, ValueError):
+                            sim_val = None
 
-                    if sim_val is not None and sim_val < similarity_threshold:
-                        print(
-                            f"\033[33mVerification result for {row.hubo_id}: {result}\033[0m"
-                        )
-                    else:
-                        print(f"Verification result for {row.hubo_id}: {result}")
-                    continue
+                        if sim_val is not None and sim_val < similarity_threshold:
+                            print(
+                                f"\033[33mVerification result for {row.hubo_id}: {result}\033[0m"
+                            )
+                        else:
+                            print(f"Verification result for {row.hubo_id}: {result}")
+                        continue
 
-                print(f"\033[31mVerification FAILED for {row.hubo_id}: {result}\033[0m")
+                    print(
+                        f"\033[31mVerification FAILED for {row.hubo_id}: {result}\033[0m"
+                    )
 
             # 3. 이미지 다운로드 또는 검증 실패시 새로운 이미지 검색
             constituency = row.constituency if hasattr(row, "constituency") else None
